@@ -34,6 +34,7 @@ const errorMessages = {
   songNotFound: "Song title not found",
   missingSongTitle: "Song Title Required",
   songAlreadyExists: "Song title Already exists in library",
+  missingSongData: "Name, artist, and year are required.",
 };
 
 const successMesseges = {

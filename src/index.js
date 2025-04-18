@@ -7,6 +7,7 @@ let {
   errorMessages,
   successMesseges,
 } = require("./objects.js");
+const e = require("express");
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
@@ -408,6 +409,44 @@ app.get("/songs/:name", async (req, res) => {
   }
 });
 
+app.post("/songs", async (req, res) => {
+  try {
+    const { name, artist, year } = req.body;
+
+    if (!name || !artist || !year) {
+      return res.status(400).send({
+        success: "false",
+        message: missingSongData,
+      });
+    }
+
+    const exists = songs.find(
+      (song) => song.name.toLowerCase() === name.toLowerCase()
+    );
+
+    if (exists) {
+      return res.status(409).send({
+        success: "false",
+        message: errorMessages.songAlreadyExists,
+      });
+    }
+
+    const newSong = { name, artist, year };
+    songs.push(newSong);
+
+    res.status(201).send({
+      success: "true",
+      message: successMesseges.songAdded,
+      result: newSong,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: "false",
+      error: error.message,
+    });
+  }
+});
+
 app.post("/songs/:name", async (req, res) => {
   try {
     const oldName = req.params.name.toLowerCase();
@@ -514,6 +553,10 @@ app.put("/songs/:name", async (req, res) => {
     const oldName = req.params.name.toLowerCase();
     const { name: newName, artist: newArtist, year: newYear } = req.body;
 
+    if (!newName || !newArtist || !newYear) {
+      return res.status(400).send(errorMessages.missingSongData);
+    }
+
     const index = songs.findIndex(
       (song) => song.name.toLowerCase() === oldName
     );
@@ -522,9 +565,11 @@ app.put("/songs/:name", async (req, res) => {
       return res.status(404).send(errorMessages.songNotFound);
     }
 
-    if (newName) songs[index].name = newName;
-    if (newArtist) songs[index].artist = newArtist;
-    if (newYear) songs[index].year = newYear;
+    songs[index] = {
+      name: newName,
+      artist: newArtist,
+      year: newYear,
+    };
 
     res.send({
       success: "true",
