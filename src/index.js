@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 
-const { movies, series, songs } = require("objects.js");
+const { movies, series, songs } = require("./objects.js");
 const port = process.env.PORT || 3000;
 
 app.get("/", (req, res) => {
