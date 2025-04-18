@@ -192,8 +192,6 @@ app.put("/movies/:title", async (req, res) => {
   }
 });
 
-//Series
-
 app.get("/series", (_req, res) => {
   if (series.length === 0) {
     res.send(errorMessages.noSeries);
@@ -360,6 +358,178 @@ app.put("/series/:title", async (req, res) => {
       success: "true",
       message: successMesseges.seriesUpdated,
       result: series,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: "false",
+      error: error.message,
+    });
+  }
+});
+
+app.get("/songs", (_req, res) => {
+  if (songs.length === 0) {
+    res.send(errorMessages.noSongs);
+  }
+  try {
+    res.status(200).send({
+      success: "true",
+      result: songs,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: "false",
+      error: error.message,
+    });
+  }
+});
+
+app.get("/songs/:name", async (req, res) => {
+  try {
+    const name = req.params.name.toLowerCase();
+    const songs = songs.find((songs) => songs.name.toLowerCase() === name);
+
+    if (!songs) {
+      return res.status(404).send({
+        success: false,
+        message: errorMessages.songNotFound,
+      });
+    }
+
+    res.status(200).send({
+      success: true,
+      result: songs,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+app.post("/songs/:name", async (req, res) => {
+  try {
+    const oldName = req.params.name.toLowerCase();
+    const { name: newName } = req.body;
+
+    if (!newName) {
+      res.status(400).send(errorMessages.missingSongName);
+    }
+
+    const index = songs.findIndex(
+      (songs) => songs.name.toLowerCase() === oldName
+    );
+
+    if (index !== -1) {
+      songs[index].name = newName;
+      return res.send({
+        success: "true",
+        message: successMesseges.songUpdated,
+        result: songs,
+      });
+    }
+
+    songs.push({ name: newName });
+    res.status(200).send({
+      success: "true",
+      message: successMesseges.songAdded,
+      result: songs,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: "false",
+      error: error.message,
+    });
+  }
+});
+
+app.delete("/songs", async (_req, res) => {
+  try {
+    if (songs.length === 0) {
+      res.send(errorMessages.noSongs);
+    }
+    songs.length = 0;
+    res.send({
+      success: "true",
+      message: successMesseges.allSongDeleted,
+      result: songs,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: "false",
+      error: error.message,
+    });
+  }
+});
+
+app.delete("/songs/:name", async (req, res) => {
+  try {
+    const name = req.params.name.toLowerCase();
+    const initialLength = songs.length;
+
+    songs = songs.filter((songs) => songs.name.toLowerCase() !== name);
+
+    if (songs.length === initialLength) {
+      return res.status(404).send(errorMessages.songNotFound);
+    }
+
+    res.send({
+      success: "true",
+      message: successMesseges.songDeleted,
+      result: songs,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: "false",
+      error: error.message,
+    });
+  }
+});
+
+app.put("/songs", async (req, res) => {
+  try {
+    const { songs: newSongs } = req.body;
+
+    if (!Array.isArray(newSongs)) {
+      return res.status(400).send(errorMessages.invalidFormat);
+    }
+
+    songs = newSongs;
+    res.send({
+      success: "true",
+      message: successMesseges.songReplaced,
+      result: songs,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: "false",
+      error: error.message,
+    });
+  }
+});
+
+app.put("/songs/:name", async (req, res) => {
+  try {
+    const oldName = req.params.name.toLowerCase();
+    const { name: newName, artist: newArtist, year: newYear } = req.body;
+
+    const index = songs.findIndex(
+      (song) => song.name.toLowerCase() === oldName
+    );
+
+    if (index === -1) {
+      return res.status(404).send(errorMessages.songNotFound);
+    }
+
+    if (newName) songs[index].name = newName;
+    if (newArtist) songs[index].artist = newArtist;
+    if (newYear) songs[index].year = newYear;
+
+    res.send({
+      success: "true",
+      message: successMesseges.songUpdated,
+      result: songs[index],
     });
   } catch (error) {
     res.status(500).send({

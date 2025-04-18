@@ -14,10 +14,10 @@ const series = [
   { title: "Devil May Cry" },
 ];
 const songs = [
-  { songName: "Feeling Like Cryril", artist: "WxymeDeneiro" },
-  { songName: "Isibaya", artist: "WxymeDeneiro" },
-  { songName: "Young kupha", artist: "Brotherkupha" },
-  { songName: "How I feel", artist: "BrotherKupha" },
+  { name: "Feeling Like Cryril", artist: "WxymeDeneiro", year: 2024 },
+  { name: "Isibaya", artist: "WxymeDeneiro", year: 2023 },
+  { name: "Young kupha", artist: "Brotherkupha", year: 2024 },
+  { name: "How I feel", artist: "BrotherKupha", year: 2023 },
 ];
 
 const errorMessages = {
@@ -26,11 +26,14 @@ const errorMessages = {
   missingTitle: "Movie Title Required",
   movieAlreadyExists: "Movie Already exists in library",
   invalidFormat: "Invalid Format entered",
-
   noSeries: "No Series in library",
   seriesNotFound: "Series title not found",
   missingSeriesTitle: "Series Title Required",
   seriesAlreadyExists: "Series title Already exists in library",
+  noSongs: "No Songs in library",
+  songNotFound: "Song title not found",
+  missingSongTitle: "Song Title Required",
+  songAlreadyExists: "Song title Already exists in library",
 };
 
 const successMesseges = {
@@ -44,6 +47,11 @@ const successMesseges = {
   seriesDeleted: "Series Deleted.",
   seriesReplaced: "Series library Replaced.",
   seriesUpdated: "Series updated.",
+  songAdded: "Song added to Library.",
+  allSongDeleted: "All songs Deleted.",
+  songDeleted: "Song Deleted.",
+  songReplaced: "Song library Replaced.",
+  songUpdated: "Song updated.",
 };
 
 module.exports = { movies, series, songs, errorMessages, successMesseges };
