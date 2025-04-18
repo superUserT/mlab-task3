@@ -1,0 +1,30 @@
+{
+  "name": "mlab-task3",
+  "version": "1.0.0",
+  "description": "A simple node media server",
+  "keywords": [
+    "Node",
+    "server"
+  ],
+  "homepage": "https://github.com/superUserT/mlab-task3#readme",
+  "bugs": {
+    "url": "https://github.com/superUserT/mlab-task3/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/superUserT/mlab-task3.git"
+  },
+  "license": "ISC",
+  "author": "Thabiso Rantsho",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "jasmine": "^5.6.0"
+  }
+}
