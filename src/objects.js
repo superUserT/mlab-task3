@@ -26,6 +26,11 @@ const errorMessages = {
   missingTitle: "Movie Title Required",
   movieAlreadyExists: "Movie Already exists in library",
   invalidFormat: "Invalid Format entered",
+
+  noSeries: "No Series in library",
+  seriesNotFound: "Series title not found",
+  missingSeriesTitle: "Series Title Required",
+  seriesAlreadyExists: "Series title Already exists in library",
 };
 
 const successMesseges = {

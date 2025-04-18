@@ -192,6 +192,183 @@ app.put("/movies/:title", async (req, res) => {
   }
 });
 
+//Series
+
+app.get("/series", (_req, res) => {
+  if (series.length === 0) {
+    res.send(errorMessages.noSeries);
+  }
+  try {
+    res.status(200).send({
+      success: "true",
+      result: series,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: "false",
+      error: error.message,
+    });
+  }
+});
+
+app.get("/series/:title", async (req, res) => {
+  try {
+    const title = req.params.title.toLowerCase();
+    const series = series.find(
+      (series) => series.title.toLowerCase() === title
+    );
+
+    if (!series) {
+      return res.status(404).send({
+        success: false,
+        message: errorMessages.seriesNotFound,
+      });
+    }
+
+    res.status(200).send({
+      success: true,
+      result: series,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+app.post("/series/:title", async (req, res) => {
+  try {
+    const oldTitle = req.params.title.toLowerCase();
+    const { title: newTitle } = req.body;
+
+    if (!newTitle) {
+      res.status(400).send(errorMessages.missingSeriesTitle);
+    }
+
+    const index = series.findIndex(
+      (series) => series.title.toLowerCase() === oldTitle
+    );
+
+    if (index !== -1) {
+      series[index].title = newTitle;
+      return res.send({
+        success: "true",
+        message: successMesseges.seriesUpdated,
+        result: series,
+      });
+    }
+
+    series.push({ title: newTitle });
+    res.status(200).send({
+      success: "true",
+      message: successMesseges.seriesAdded,
+      result: series,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: "false",
+      error: error.message,
+    });
+  }
+});
+
+app.delete("/series", async (_req, res) => {
+  try {
+    if (series.length === 0) {
+      res.send(errorMessages.noSeries);
+    }
+    series.length = 0;
+    res.send({
+      success: "true",
+      message: successMesseges.allSeriessDeleted,
+      result: series,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: "false",
+      error: error.message,
+    });
+  }
+});
+
+app.delete("/series/:title", async (req, res) => {
+  try {
+    const title = req.params.title.toLowerCase();
+    const initialLength = series.length;
+
+    series = series.filter((series) => series.title.toLowerCase() !== title);
+
+    if (series.length === initialLength) {
+      return res.status(404).send(errorMessages.seriesNotFound);
+    }
+
+    res.send({
+      success: "true",
+      message: successMesseges.seriesDeleted,
+      result: series,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: "false",
+      error: error.message,
+    });
+  }
+});
+
+app.put("/series", async (req, res) => {
+  try {
+    const { series: newSeries } = req.body;
+
+    if (!Array.isArray(newSeries)) {
+      return res.status(400).send(errorMessages.invalidFormat);
+    }
+
+    series = newSeries;
+    res.send({
+      success: "true",
+      message: successMesseges.seriesReplaced,
+      result: series,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: "false",
+      error: error.message,
+    });
+  }
+});
+
+app.put("/series/:title", async (req, res) => {
+  try {
+    const oldTitle = req.params.title.toLowerCase();
+    const { title: newTitle } = req.body;
+
+    if (!newTitle) {
+      return res.status(400).send(errorMessages.missingSeriesTitle);
+    }
+
+    const index = series.findIndex(
+      (series) => series.title.toLowerCase() === oldTitle
+    );
+
+    if (index === -1) {
+      return res.status(404).send(errorMessages.seriesNotFound);
+    }
+
+    series[index].title = newTitle;
+    res.send({
+      success: "true",
+      message: successMesseges.seriesUpdated,
+      result: series,
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: "false",
+      error: error.message,
+    });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Multimedia app listening on port ${port}`);
 });
