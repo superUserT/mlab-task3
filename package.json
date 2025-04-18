@@ -24,7 +24,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jasmine",
-    "start": "node src/index.js"
+    "start": "nodemon src/index.js"
   },
   "dependencies": {
     "dotenv": "^16.5.0",
