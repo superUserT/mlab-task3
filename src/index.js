@@ -7,11 +7,19 @@ let {
   errorMessages,
   successMesseges,
 } = require("./objects.js");
-const e = require("express");
+const {
+  createMoviesJson,
+  createSeriesJson,
+  createSongsJson,
+} = require("./helper_functions.js");
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+createMoviesJson();
+createSeriesJson();
+createSongsJson();
 
 app.use((err, _req, res, _next) => {
   res.status(err.status || 500);
