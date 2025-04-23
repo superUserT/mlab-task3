@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const app = express();
 let {
   movies,
@@ -11,11 +12,18 @@ const {
   createMoviesJson,
   createSeriesJson,
   createSongsJson,
-  saveMoviesToJson,
-  saveSeriesToJson,
-  saveSongsToJson,
+  // saveMoviesToJson,
+  // saveSeriesToJson,
+  // saveSongsToJson,
 } = require("./helper_functions.js");
+
+const jsonDir = path.join(__dirname, "../json_files");
+
 const port = process.env.PORT || 3000;
+
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(__dirname, "..", "README.md"));
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -115,7 +123,7 @@ app.delete("/movies", async (_req, res) => {
     if (movies.length === 0) {
       res.send(errorMessages.noMovies);
     }
-    movies.length = 0;
+    movies.length = [];
 
     saveMoviesToJson();
     res.send({
@@ -299,7 +307,7 @@ app.delete("/series", async (_req, res) => {
     if (series.length === 0) {
       res.send(errorMessages.noSeries);
     }
-    series.length = 0;
+    series.length = [];
 
     saveSeriesToJson();
     res.send({
@@ -520,7 +528,7 @@ app.delete("/songs", async (_req, res) => {
     if (songs.length === 0) {
       res.send(errorMessages.noSongs);
     }
-    songs.length = 0;
+    songs.length = [];
 
     saveSongsToJson();
     res.send({
