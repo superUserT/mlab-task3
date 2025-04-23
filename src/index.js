@@ -11,6 +11,9 @@ const {
   createMoviesJson,
   createSeriesJson,
   createSongsJson,
+  saveMoviesToJson,
+  saveSeriesToJson,
+  saveSongsToJson,
 } = require("./helper_functions.js");
 const port = process.env.PORT || 3000;
 
@@ -76,6 +79,7 @@ app.post("/movies/:title", async (req, res) => {
 
     if (!newTitle) {
       res.status(400).send(errorMessages.missingTitle);
+      return;
     }
 
     const index = movies.findIndex(
@@ -92,6 +96,7 @@ app.post("/movies/:title", async (req, res) => {
     }
 
     movies.push({ title: newTitle });
+    saveMoviesToJson();
     res.status(200).send({
       success: "true",
       message: successMesseges.movieAdded,
@@ -111,6 +116,8 @@ app.delete("/movies", async (_req, res) => {
       res.send(errorMessages.noMovies);
     }
     movies.length = 0;
+
+    saveMoviesToJson();
     res.send({
       success: "true",
       message: successMesseges.allMoviesDeleted,
@@ -135,6 +142,7 @@ app.delete("/movies/:title", async (req, res) => {
       return res.status(404).send(errorMessages.movieNotFound);
     }
 
+    saveMoviesToJson();
     res.send({
       success: "true",
       message: successMesseges.movieDeleted,
@@ -157,6 +165,7 @@ app.put("/movies", async (req, res) => {
     }
 
     movies = newMovies;
+    saveMoviesToJson();
     res.send({
       success: "true",
       message: successMesseges.moviesReplaced,
@@ -188,6 +197,8 @@ app.put("/movies/:title", async (req, res) => {
     }
 
     movies[index].title = newTitle;
+
+    saveMoviesToJson();
     res.send({
       success: "true",
       message: successMesseges.movieUpdated,
@@ -251,6 +262,7 @@ app.post("/series/:title", async (req, res) => {
 
     if (!newTitle) {
       res.status(400).send(errorMessages.missingSeriesTitle);
+      return;
     }
 
     const index = series.findIndex(
@@ -267,6 +279,8 @@ app.post("/series/:title", async (req, res) => {
     }
 
     series.push({ title: newTitle });
+
+    saveSeriesToJson();
     res.status(200).send({
       success: "true",
       message: successMesseges.seriesAdded,
@@ -286,6 +300,8 @@ app.delete("/series", async (_req, res) => {
       res.send(errorMessages.noSeries);
     }
     series.length = 0;
+
+    saveSeriesToJson();
     res.send({
       success: "true",
       message: successMesseges.allSeriessDeleted,
@@ -310,6 +326,7 @@ app.delete("/series/:title", async (req, res) => {
       return res.status(404).send(errorMessages.seriesNotFound);
     }
 
+    saveSeriesToJson();
     res.send({
       success: "true",
       message: successMesseges.seriesDeleted,
@@ -332,6 +349,8 @@ app.put("/series", async (req, res) => {
     }
 
     series = newSeries;
+
+    saveSeriesToJson();
     res.send({
       success: "true",
       message: successMesseges.seriesReplaced,
@@ -363,6 +382,8 @@ app.put("/series/:title", async (req, res) => {
     }
 
     series[index].title = newTitle;
+
+    saveSeriesToJson();
     res.send({
       success: "true",
       message: successMesseges.seriesUpdated,
@@ -442,6 +463,7 @@ app.post("/songs", async (req, res) => {
     const newSong = { name, artist, year };
     songs.push(newSong);
 
+    saveSongsToJson();
     res.status(201).send({
       success: "true",
       message: successMesseges.songAdded,
@@ -478,6 +500,8 @@ app.post("/songs/:name", async (req, res) => {
     }
 
     songs.push({ name: newName });
+
+    saveSongsToJson();
     res.status(200).send({
       success: "true",
       message: successMesseges.songAdded,
@@ -497,6 +521,8 @@ app.delete("/songs", async (_req, res) => {
       res.send(errorMessages.noSongs);
     }
     songs.length = 0;
+
+    saveSongsToJson();
     res.send({
       success: "true",
       message: successMesseges.allSongDeleted,
@@ -521,6 +547,7 @@ app.delete("/songs/:name", async (req, res) => {
       return res.status(404).send(errorMessages.songNotFound);
     }
 
+    saveSongsToJson();
     res.send({
       success: "true",
       message: successMesseges.songDeleted,
@@ -543,6 +570,8 @@ app.put("/songs", async (req, res) => {
     }
 
     songs = newSongs;
+
+    saveSongsToJson();
     res.send({
       success: "true",
       message: successMesseges.songReplaced,
@@ -579,6 +608,7 @@ app.put("/songs/:name", async (req, res) => {
       year: newYear,
     };
 
+    saveSongsToJson();
     res.send({
       success: "true",
       message: successMesseges.songUpdated,

@@ -64,4 +64,38 @@ function createSongsJson() {
   }
 }
 
-module.exports = { createMoviesJson, createSeriesJson, createSongsJson };
+function saveMoviesToJson() {
+  try {
+    const moviesFilepath = path.join(saveDir, "movies.json");
+    fs.writeFileSync(moviesFilepath, JSON.stringify(movies, null, 2));
+  } catch (error) {
+    throw new Error(fileErrors.moviesFileNotCreated);
+  }
+}
+
+function saveSeriesToJson() {
+  try {
+    const seriesFilepath = path.join(saveDir, "series.json");
+    fs.writeFileSync(seriesFilepath, JSON.stringify(series, null, 2));
+  } catch (error) {
+    throw new Error(fileErrors.seriesFileNotCreated);
+  }
+}
+
+function saveSongsToJson() {
+  try {
+    const songsFilepath = path.join(saveDir, "songs.json");
+    fs.writeFileSync(songsFilepath, JSON.stringify(songs, null, 2));
+  } catch (error) {
+    throw new Error(fileErrors.songsFileNotCreated);
+  }
+}
+
+module.exports = {
+  createMoviesJson,
+  createSeriesJson,
+  createSongsJson,
+  saveMoviesToJson,
+  saveSeriesToJson,
+  saveSongsToJson,
+};
