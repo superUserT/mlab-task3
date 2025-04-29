@@ -2,100 +2,112 @@ const fs = require("fs");
 const path = require("path");
 const { fileErrors } = require("./objects.js");
 const saveDir = path.join(__dirname, "../json_files");
-const { movies, series, songs } = require("./objects.js");
 
-function createMoviesJson() {
+function initializeJsonFiles() {
   try {
     if (!fs.existsSync(saveDir)) {
-      fs.mkdirSync(saveDir);
+      fs.mkdirSync(saveDir, { recursive: true });
     }
 
+    const files = {
+      "movies.json": [],
+      "series.json": [],
+      "songs.json": [],
+    };
+
+    Object.entries(files).forEach(([filename, defaultContent]) => {
+      const filepath = path.join(saveDir, filename);
+      if (!fs.existsSync(filepath)) {
+        fs.writeFileSync(filepath, JSON.stringify(defaultContent, null, 2));
+      }
+    });
+  } catch (error) {
+    console.error("Failed to initialize JSON files:", error);
+    throw error;
+  }
+}
+
+function getMoviesFromJson() {
+  try {
     const moviesFilepath = path.join(saveDir, "movies.json");
-    const currentContent = fs.existsSync(moviesFilepath)
-      ? fs.readFileSync(moviesFilepath, "utf8")
-      : null;
-    const newContent = JSON.stringify(movies, null, 2);
-
-    if (currentContent !== newContent) {
-      fs.writeFileSync(moviesFilepath, newContent);
+    if (!fs.existsSync(moviesFilepath)) {
+      return [];
     }
+    const content = fs.readFileSync(moviesFilepath, "utf8");
+    return JSON.parse(content);
   } catch (error) {
-    throw new Error(fileErrors.moviesFileNotCreated);
+    console.error("Error reading movies file:", error);
+    return [];
   }
 }
 
-function createSeriesJson() {
-  try {
-    if (!fs.existsSync(saveDir)) {
-      fs.mkdirSync(saveDir);
-    }
-
-    const seriesFilepath = path.join(saveDir, "series.json");
-    const currentContent = fs.existsSync(seriesFilepath)
-      ? fs.readFileSync(seriesFilepath, "utf8")
-      : null;
-    const newContent = JSON.stringify(series, null, 2);
-
-    if (currentContent !== newContent) {
-      fs.writeFileSync(seriesFilepath, newContent);
-    }
-  } catch (error) {
-    throw new Error(fileErrors.seriesFileNotCreated);
-  }
-}
-
-function createSongsJson() {
-  try {
-    if (!fs.existsSync(saveDir)) {
-      fs.mkdirSync(saveDir);
-    }
-
-    const songsFilepath = path.join(saveDir, "songs.json");
-    const currentContent = fs.existsSync(songsFilepath)
-      ? fs.readFileSync(songsFilepath, "utf8")
-      : null;
-    const newContent = JSON.stringify(songs, null, 2);
-
-    if (currentContent !== newContent) {
-      fs.writeFileSync(songsFilepath, newContent);
-    }
-  } catch (error) {
-    throw new Error(fileErrors.songsFileNotCreated);
-  }
-}
-
-function saveMoviesToJson() {
+function saveMoviesToJson(movies) {
   try {
     const moviesFilepath = path.join(saveDir, "movies.json");
     fs.writeFileSync(moviesFilepath, JSON.stringify(movies, null, 2));
+    return true;
   } catch (error) {
+    console.error("Error saving movies file:", error);
     throw new Error(fileErrors.moviesFileNotCreated);
   }
 }
 
-function saveSeriesToJson() {
+function getSeriesFromJson() {
+  try {
+    const seriesFilepath = path.join(saveDir, "series.json");
+    if (!fs.existsSync(seriesFilepath)) {
+      return [];
+    }
+    const content = fs.readFileSync(seriesFilepath, "utf8");
+    return JSON.parse(content);
+  } catch (error) {
+    console.error("Error reading series file:", error);
+    return [];
+  }
+}
+
+function saveSeriesToJson(series) {
   try {
     const seriesFilepath = path.join(saveDir, "series.json");
     fs.writeFileSync(seriesFilepath, JSON.stringify(series, null, 2));
+    return true;
   } catch (error) {
+    console.error("Error saving series file:", error);
     throw new Error(fileErrors.seriesFileNotCreated);
   }
 }
 
-function saveSongsToJson() {
+function getSongsFromJson() {
+  try {
+    const songsFilepath = path.join(saveDir, "songs.json");
+    if (!fs.existsSync(songsFilepath)) {
+      return [];
+    }
+    const content = fs.readFileSync(songsFilepath, "utf8");
+    return JSON.parse(content);
+  } catch (error) {
+    console.error("Error reading songs file:", error);
+    return [];
+  }
+}
+
+function saveSongsToJson(songs) {
   try {
     const songsFilepath = path.join(saveDir, "songs.json");
     fs.writeFileSync(songsFilepath, JSON.stringify(songs, null, 2));
+    return true;
   } catch (error) {
+    console.error("Error saving songs file:", error);
     throw new Error(fileErrors.songsFileNotCreated);
   }
 }
 
 module.exports = {
-  createMoviesJson,
-  createSeriesJson,
-  createSongsJson,
+  initializeJsonFiles,
+  getMoviesFromJson,
   saveMoviesToJson,
+  getSeriesFromJson,
   saveSeriesToJson,
+  getSongsFromJson,
   saveSongsToJson,
 };

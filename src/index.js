@@ -1,23 +1,16 @@
 const express = require("express");
 const path = require("path");
 const app = express();
-let {
-  movies,
-  series,
-  songs,
-  errorMessages,
-  successMesseges,
-} = require("./objects.js");
+const { errorMessages, successMesseges } = require("./objects.js");
 const {
-  createMoviesJson,
-  createSeriesJson,
-  createSongsJson,
-  // saveMoviesToJson,
-  // saveSeriesToJson,
-  // saveSongsToJson,
+  initializeJsonFiles,
+  getMoviesFromJson,
+  saveMoviesToJson,
+  getSeriesFromJson,
+  saveSeriesToJson,
+  getSongsFromJson,
+  saveSongsToJson,
 } = require("./helper_functions.js");
-
-const jsonDir = path.join(__dirname, "../json_files");
 
 const port = process.env.PORT || 3000;
 
@@ -28,9 +21,7 @@ app.get("/", (_req, res) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-createMoviesJson();
-createSeriesJson();
-createSongsJson();
+initializeJsonFiles();
 
 app.use((err, _req, res, _next) => {
   res.status(err.status || 500);
@@ -40,17 +31,20 @@ app.use((err, _req, res, _next) => {
 });
 
 app.get("/movies", (_req, res) => {
-  if (movies.length === 0) {
-    res.send(errorMessages.noMovies);
-  }
   try {
+    const movies = getMoviesFromJson();
+
+    if (movies.length === 0) {
+      return res.send(errorMessages.noMovies);
+    }
+
     res.status(200).send({
-      success: "true",
+      success: true,
       result: movies,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -59,6 +53,7 @@ app.get("/movies", (_req, res) => {
 app.get("/movies/:title", async (req, res) => {
   try {
     const title = req.params.title.toLowerCase();
+    const movies = getMoviesFromJson();
     const movie = movies.find((movie) => movie.title.toLowerCase() === title);
 
     if (!movie) {
@@ -86,33 +81,36 @@ app.post("/movies/:title", async (req, res) => {
     const { title: newTitle } = req.body;
 
     if (!newTitle) {
-      res.status(400).send(errorMessages.missingTitle);
-      return;
+      return res.status(400).send(errorMessages.missingTitle);
     }
 
+    const movies = getMoviesFromJson();
     const index = movies.findIndex(
       (movie) => movie.title.toLowerCase() === oldTitle
     );
 
     if (index !== -1) {
       movies[index].title = newTitle;
+      saveMoviesToJson(movies);
+
       return res.send({
-        success: "true",
+        success: true,
         message: successMesseges.movieUpdated,
         result: movies,
       });
     }
 
     movies.push({ title: newTitle });
-    saveMoviesToJson();
+    saveMoviesToJson(movies);
+
     res.status(200).send({
-      success: "true",
+      success: true,
       message: successMesseges.movieAdded,
       result: movies,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -120,20 +118,22 @@ app.post("/movies/:title", async (req, res) => {
 
 app.delete("/movies", async (_req, res) => {
   try {
-    if (movies.length === 0) {
-      res.send(errorMessages.noMovies);
-    }
-    movies.length = [];
+    const movies = getMoviesFromJson();
 
-    saveMoviesToJson();
+    if (movies.length === 0) {
+      return res.send(errorMessages.noMovies);
+    }
+
+    saveMoviesToJson([]);
+
     res.send({
-      success: "true",
+      success: true,
       message: successMesseges.allMoviesDeleted,
-      result: movies,
+      result: [],
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -142,23 +142,27 @@ app.delete("/movies", async (_req, res) => {
 app.delete("/movies/:title", async (req, res) => {
   try {
     const title = req.params.title.toLowerCase();
+    const movies = getMoviesFromJson();
     const initialLength = movies.length;
 
-    movies = movies.filter((movie) => movie.title.toLowerCase() !== title);
+    const updatedMovies = movies.filter(
+      (movie) => movie.title.toLowerCase() !== title
+    );
 
-    if (movies.length === initialLength) {
+    if (updatedMovies.length === initialLength) {
       return res.status(404).send(errorMessages.movieNotFound);
     }
 
-    saveMoviesToJson();
+    saveMoviesToJson(updatedMovies);
+
     res.send({
-      success: "true",
+      success: true,
       message: successMesseges.movieDeleted,
-      result: movies,
+      result: updatedMovies,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -172,16 +176,16 @@ app.put("/movies", async (req, res) => {
       return res.status(400).send(errorMessages.invalidFormat);
     }
 
-    movies = newMovies;
-    saveMoviesToJson();
+    saveMoviesToJson(newMovies);
+
     res.send({
-      success: "true",
+      success: true,
       message: successMesseges.moviesReplaced,
-      result: movies,
+      result: newMovies,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -196,6 +200,7 @@ app.put("/movies/:title", async (req, res) => {
       return res.status(400).send(errorMessages.missingTitle);
     }
 
+    const movies = getMoviesFromJson();
     const index = movies.findIndex(
       (movie) => movie.title.toLowerCase() === oldTitle
     );
@@ -205,33 +210,36 @@ app.put("/movies/:title", async (req, res) => {
     }
 
     movies[index].title = newTitle;
+    saveMoviesToJson(movies);
 
-    saveMoviesToJson();
     res.send({
-      success: "true",
+      success: true,
       message: successMesseges.movieUpdated,
       result: movies,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
 });
 
 app.get("/series", (_req, res) => {
-  if (series.length === 0) {
-    res.send(errorMessages.noSeries);
-  }
   try {
+    const series = getSeriesFromJson();
+
+    if (series.length === 0) {
+      return res.send(errorMessages.noSeries);
+    }
+
     res.status(200).send({
-      success: "true",
+      success: true,
       result: series,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -240,11 +248,10 @@ app.get("/series", (_req, res) => {
 app.get("/series/:title", async (req, res) => {
   try {
     const title = req.params.title.toLowerCase();
-    const series = series.find(
-      (series) => series.title.toLowerCase() === title
-    );
+    const allSeries = getSeriesFromJson();
+    const seriesItem = allSeries.find((s) => s.title.toLowerCase() === title);
 
-    if (!series) {
+    if (!seriesItem) {
       return res.status(404).send({
         success: false,
         message: errorMessages.seriesNotFound,
@@ -253,7 +260,7 @@ app.get("/series/:title", async (req, res) => {
 
     res.status(200).send({
       success: true,
-      result: series,
+      result: seriesItem,
     });
   } catch (error) {
     res.status(500).send({
@@ -269,34 +276,36 @@ app.post("/series/:title", async (req, res) => {
     const { title: newTitle } = req.body;
 
     if (!newTitle) {
-      res.status(400).send(errorMessages.missingSeriesTitle);
-      return;
+      return res.status(400).send(errorMessages.missingSeriesTitle);
     }
 
-    const index = series.findIndex(
-      (series) => series.title.toLowerCase() === oldTitle
+    const allSeries = getSeriesFromJson();
+    const index = allSeries.findIndex(
+      (s) => s.title.toLowerCase() === oldTitle
     );
 
     if (index !== -1) {
-      series[index].title = newTitle;
+      allSeries[index].title = newTitle;
+      saveSeriesToJson(allSeries);
+
       return res.send({
-        success: "true",
+        success: true,
         message: successMesseges.seriesUpdated,
-        result: series,
+        result: allSeries,
       });
     }
 
-    series.push({ title: newTitle });
+    allSeries.push({ title: newTitle });
+    saveSeriesToJson(allSeries);
 
-    saveSeriesToJson();
     res.status(200).send({
-      success: "true",
+      success: true,
       message: successMesseges.seriesAdded,
-      result: series,
+      result: allSeries,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -304,20 +313,22 @@ app.post("/series/:title", async (req, res) => {
 
 app.delete("/series", async (_req, res) => {
   try {
-    if (series.length === 0) {
-      res.send(errorMessages.noSeries);
-    }
-    series.length = [];
+    const series = getSeriesFromJson();
 
-    saveSeriesToJson();
+    if (series.length === 0) {
+      return res.send(errorMessages.noSeries);
+    }
+
+    saveSeriesToJson([]);
+
     res.send({
-      success: "true",
+      success: true,
       message: successMesseges.allSeriessDeleted,
-      result: series,
+      result: [],
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -326,23 +337,27 @@ app.delete("/series", async (_req, res) => {
 app.delete("/series/:title", async (req, res) => {
   try {
     const title = req.params.title.toLowerCase();
-    const initialLength = series.length;
+    const allSeries = getSeriesFromJson();
+    const initialLength = allSeries.length;
 
-    series = series.filter((series) => series.title.toLowerCase() !== title);
+    const updatedSeries = allSeries.filter(
+      (s) => s.title.toLowerCase() !== title
+    );
 
-    if (series.length === initialLength) {
+    if (updatedSeries.length === initialLength) {
       return res.status(404).send(errorMessages.seriesNotFound);
     }
 
-    saveSeriesToJson();
+    saveSeriesToJson(updatedSeries);
+
     res.send({
-      success: "true",
+      success: true,
       message: successMesseges.seriesDeleted,
-      result: series,
+      result: updatedSeries,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -356,17 +371,16 @@ app.put("/series", async (req, res) => {
       return res.status(400).send(errorMessages.invalidFormat);
     }
 
-    series = newSeries;
+    saveSeriesToJson(newSeries);
 
-    saveSeriesToJson();
     res.send({
-      success: "true",
+      success: true,
       message: successMesseges.seriesReplaced,
-      result: series,
+      result: newSeries,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -381,42 +395,46 @@ app.put("/series/:title", async (req, res) => {
       return res.status(400).send(errorMessages.missingSeriesTitle);
     }
 
-    const index = series.findIndex(
-      (series) => series.title.toLowerCase() === oldTitle
+    const allSeries = getSeriesFromJson();
+    const index = allSeries.findIndex(
+      (s) => s.title.toLowerCase() === oldTitle
     );
 
     if (index === -1) {
       return res.status(404).send(errorMessages.seriesNotFound);
     }
 
-    series[index].title = newTitle;
+    allSeries[index].title = newTitle;
+    saveSeriesToJson(allSeries);
 
-    saveSeriesToJson();
     res.send({
-      success: "true",
+      success: true,
       message: successMesseges.seriesUpdated,
-      result: series,
+      result: allSeries,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
 });
 
 app.get("/songs", (_req, res) => {
-  if (songs.length === 0) {
-    res.send(errorMessages.noSongs);
-  }
   try {
+    const songs = getSongsFromJson();
+
+    if (songs.length === 0) {
+      return res.send(errorMessages.noSongs);
+    }
+
     res.status(200).send({
-      success: "true",
+      success: true,
       result: songs,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -425,9 +443,10 @@ app.get("/songs", (_req, res) => {
 app.get("/songs/:name", async (req, res) => {
   try {
     const name = req.params.name.toLowerCase();
-    const songs = songs.find((songs) => songs.name.toLowerCase() === name);
+    const songs = getSongsFromJson();
+    const song = songs.find((song) => song.name.toLowerCase() === name);
 
-    if (!songs) {
+    if (!song) {
       return res.status(404).send({
         success: false,
         message: errorMessages.songNotFound,
@@ -436,7 +455,7 @@ app.get("/songs/:name", async (req, res) => {
 
     res.status(200).send({
       success: true,
-      result: songs,
+      result: song,
     });
   } catch (error) {
     res.status(500).send({
@@ -452,34 +471,35 @@ app.post("/songs", async (req, res) => {
 
     if (!name || !artist || !year) {
       return res.status(400).send({
-        success: "false",
-        message: missingSongData,
+        success: false,
+        message: errorMessages.missingSongData,
       });
     }
 
+    const songs = getSongsFromJson();
     const exists = songs.find(
       (song) => song.name.toLowerCase() === name.toLowerCase()
     );
 
     if (exists) {
       return res.status(409).send({
-        success: "false",
+        success: false,
         message: errorMessages.songAlreadyExists,
       });
     }
 
     const newSong = { name, artist, year };
     songs.push(newSong);
+    saveSongsToJson(songs);
 
-    saveSongsToJson();
     res.status(201).send({
-      success: "true",
+      success: true,
       message: successMesseges.songAdded,
       result: newSong,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -491,33 +511,36 @@ app.post("/songs/:name", async (req, res) => {
     const { name: newName } = req.body;
 
     if (!newName) {
-      res.status(400).send(errorMessages.missingSongName);
+      return res.status(400).send(errorMessages.missingSongTitle);
     }
 
+    const songs = getSongsFromJson();
     const index = songs.findIndex(
-      (songs) => songs.name.toLowerCase() === oldName
+      (song) => song.name.toLowerCase() === oldName
     );
 
     if (index !== -1) {
       songs[index].name = newName;
+      saveSongsToJson(songs);
+
       return res.send({
-        success: "true",
+        success: true,
         message: successMesseges.songUpdated,
         result: songs,
       });
     }
 
     songs.push({ name: newName });
+    saveSongsToJson(songs);
 
-    saveSongsToJson();
     res.status(200).send({
-      success: "true",
+      success: true,
       message: successMesseges.songAdded,
       result: songs,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -525,20 +548,22 @@ app.post("/songs/:name", async (req, res) => {
 
 app.delete("/songs", async (_req, res) => {
   try {
-    if (songs.length === 0) {
-      res.send(errorMessages.noSongs);
-    }
-    songs.length = [];
+    const songs = getSongsFromJson();
 
-    saveSongsToJson();
+    if (songs.length === 0) {
+      return res.send(errorMessages.noSongs);
+    }
+
+    saveSongsToJson([]);
+
     res.send({
-      success: "true",
+      success: true,
       message: successMesseges.allSongDeleted,
-      result: songs,
+      result: [],
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -547,23 +572,27 @@ app.delete("/songs", async (_req, res) => {
 app.delete("/songs/:name", async (req, res) => {
   try {
     const name = req.params.name.toLowerCase();
+    const songs = getSongsFromJson();
     const initialLength = songs.length;
 
-    songs = songs.filter((songs) => songs.name.toLowerCase() !== name);
+    const updatedSongs = songs.filter(
+      (song) => song.name.toLowerCase() !== name
+    );
 
-    if (songs.length === initialLength) {
+    if (updatedSongs.length === initialLength) {
       return res.status(404).send(errorMessages.songNotFound);
     }
 
-    saveSongsToJson();
+    saveSongsToJson(updatedSongs);
+
     res.send({
-      success: "true",
+      success: true,
       message: successMesseges.songDeleted,
-      result: songs,
+      result: updatedSongs,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -577,17 +606,16 @@ app.put("/songs", async (req, res) => {
       return res.status(400).send(errorMessages.invalidFormat);
     }
 
-    songs = newSongs;
+    saveSongsToJson(newSongs);
 
-    saveSongsToJson();
     res.send({
-      success: "true",
+      success: true,
       message: successMesseges.songReplaced,
-      result: songs,
+      result: newSongs,
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
@@ -602,6 +630,7 @@ app.put("/songs/:name", async (req, res) => {
       return res.status(400).send(errorMessages.missingSongData);
     }
 
+    const songs = getSongsFromJson();
     const index = songs.findIndex(
       (song) => song.name.toLowerCase() === oldName
     );
@@ -616,15 +645,16 @@ app.put("/songs/:name", async (req, res) => {
       year: newYear,
     };
 
-    saveSongsToJson();
+    saveSongsToJson(songs);
+
     res.send({
-      success: "true",
+      success: true,
       message: successMesseges.songUpdated,
       result: songs[index],
     });
   } catch (error) {
     res.status(500).send({
-      success: "false",
+      success: false,
       error: error.message,
     });
   }
