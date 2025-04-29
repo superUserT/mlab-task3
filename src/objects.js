@@ -55,4 +55,17 @@ const successMesseges = {
   songUpdated: "Song updated.",
 };
 
-module.exports = { movies, series, songs, errorMessages, successMesseges };
+const fileErrors = {
+  moviesFileNotCreated: "Movies file not created",
+  seriesFileNotCreated: "Series file not created",
+  songsFileNotCreated: "Songs file not created",
+};
+
+module.exports = {
+  movies,
+  series,
+  songs,
+  errorMessages,
+  successMesseges,
+  fileErrors,
+};
