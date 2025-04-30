@@ -14,12 +14,9 @@ const {
 
 const port = process.env.PORT || 3000;
 
-app.get("/", (_req, res) => {
-  res.sendFile(path.join(__dirname, "..", "README.md"));
-});
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname)));
 
 initializeJsonFiles();
 
@@ -28,6 +25,10 @@ app.use((err, _req, res, _next) => {
   res.render("error", {
     message: err.message,
   });
+});
+
+app.get("/", (_req, res) => {
+  res.sendFile(path.join(__dirname, "..", "index.html"));
 });
 
 app.get("/movies", (_req, res) => {

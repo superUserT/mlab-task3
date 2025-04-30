@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mock Media Server Documentation</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        color: #333;
+      }
+      h1,
+      h2 {
+        color: #2c3e50;
+      }
+      code {
+        background-color: #f4f4f4;
+        padding: 2px 5px;
+        border-radius: 3px;
+        font-family: monospace;
+      }
+      pre {
+        background-color: #f8f8f8;
+        padding: 10px;
+        border-radius: 5px;
+        overflow-x: auto;
+      }
+      .endpoint {
+        background-color: #e8f4f8;
+        padding: 15px;
+        border-left: 4px solid #3498db;
+        margin-bottom: 20px;
+        border-radius: 0 5px 5px 0;
+      }
+      .note {
+        background-color: #fff3cd;
+        padding: 15px;
+        border-left: 4px solid #ffc107;
+        margin-bottom: 20px;
+        border-radius: 0 5px 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Mock Media Server Documentation</h1>
+
+    <p>
+      This is a simple RESTful API built using Express.js to manage media
+      collections including movies, series, and songs.
+    </p>
+
+    <h2>🛠️ Setup</h2>
+    <ol>
+      <li>
+        <strong>Clone the repository</strong>:
+        <pre><code>git clone https://github.com/superUserT/mlab-task3.git
+cd mlab-task3</code></pre>
+      </li>
+      <li>
+        <strong>Install dependencies</strong>:
+        <pre><code>npm i</code></pre>
+      </li>
+      <li>
+        <strong>Start the server</strong>:
+        <pre><code>npm start</code></pre>
+        By default, the server runs on port <code>3000</code>.
+      </li>
+    </ol>
+
+    <h2>📡 API Endpoints</h2>
+
+    <h3>Movies Endpoints</h3>
+    <div class="endpoint">
+      <h4><code>GET /movies</code></h4>
+      <p>Returns all movies in the library.</p>
+      <p><strong>Example:</strong></p>
+      <pre><code>curl http://localhost:3000/movies</code></pre>
+    </div>
+
+    <div class="endpoint">
+      <h4><code>POST /movies/:title</code></h4>
+      <p>Adds a new movie or updates an existing one.</p>
+      <p><strong>Example:</strong></p>
+      <pre><code>curl -X POST http://localhost:3000/movies \
+  -H "Content-Type: application/json" \
+  -d '{"title": "New Movie"}'</code></pre>
+    </div>
+
+    <h3>Series Endpoints</h3>
+    <div class="endpoint">
+      <h4><code>GET /series</code></h4>
+      <p>Returns all series in the library.</p>
+      <p><strong>Example:</strong></p>
+      <pre><code>curl http://localhost:3000/series</code></pre>
+    </div>
+
+    <h3>Songs Endpoints</h3>
+    <div class="endpoint">
+      <h4><code>POST /songs</code></h4>
+      <p>Adds a new song (requires name, artist, and year).</p>
+      <p><strong>Example:</strong></p>
+      <pre><code>curl -X POST http://localhost:3000/songs \
+  -H "Content-Type: application/json" \
+  -d '{"name": "New Song", "artist": "Artist Name", "year": 2023}'</code></pre>
+    </div>
+
+    <div class="note">
+      <h2>🔒 Notes</h2>
+      <ul>
+        <li>
+          The API uses file-based storage (JSON files in the
+          <code>json_files</code> directory).
+        </li>
+        <li>
+          All endpoints support standard CRUD operations (GET, POST, PUT,
+          DELETE).
+        </li>
+        <li>Error handling is implemented for common scenarios.</li>
+      </ul>
+    </div>
+  </body>
+</html>
